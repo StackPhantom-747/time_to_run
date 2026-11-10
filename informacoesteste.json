@@ -1,0 +1,271 @@
+[
+    {
+        "numero": "101",
+        "nome": "João Silva",
+        "turma": "9A",
+        "ano": "9",
+        "genero": "Masculino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "102",
+        "nome": "Maria Santos",
+        "turma": "8B",
+        "ano": "8",
+        "genero": "Feminino",
+        "categoria": "Iniciados"
+    },
+ 
+    {
+        "numero": "103",
+        "nome": "Pedro Costa",
+        "turma": "7A",
+        "ano": "7",
+        "genero": "Masculino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "104",
+        "nome": "Ana Oliveira",
+        "turma": "9B",
+        "ano": "9",
+        "genero": "Feminino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "105",
+        "nome": "Miguel Ferreira",
+        "turma": "8A",
+        "ano": "8",
+        "genero": "Masculino",
+        "categoria": "Iniciados"
+    },
+ 
+    {
+        "numero": "106",
+        "nome": "Sofia Rodrigues",
+        "turma": "7B",
+        "ano": "7",
+        "genero": "Feminino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "107",
+        "nome": "Tiago Martins",
+        "turma": "9A",
+        "ano": "9",
+        "genero": "Masculino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "108",
+        "nome": "Beatriz Sousa",
+        "turma": "8B",
+        "ano": "8",
+        "genero": "Feminino",
+        "categoria": "Iniciados"
+    },
+ 
+    {
+        "numero": "109",
+        "nome": "Diogo Pereira",
+        "turma": "7A",
+        "ano": "7",
+        "genero": "Masculino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "110",
+        "nome": "Inês Costa",
+        "turma": "9B",
+        "ano": "9",
+        "genero": "Feminino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "111",
+        "nome": "Gonçalo Almeida",
+        "turma": "8A",
+        "ano": "8",
+        "genero": "Masculino",
+        "categoria": "Iniciados"
+    },
+ 
+    {
+        "numero": "112",
+        "nome": "Leonor Carvalho",
+        "turma": "7B",
+        "ano": "7",
+        "genero": "Feminino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "113",
+        "nome": "Rafael Gomes",
+        "turma": "9A",
+        "ano": "9",
+        "genero": "Masculino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "114",
+        "nome": "Matilde Lopes",
+        "turma": "8B",
+        "ano": "8",
+        "genero": "Feminino",
+        "categoria": "Iniciados"
+    },
+ 
+    {
+        "numero": "115",
+        "nome": "Francisco Mendes",
+        "turma": "7A",
+        "ano": "7",
+        "genero": "Masculino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "116",
+        "nome": "Carolina Ribeiro",
+        "turma": "9B",
+        "ano": "9",
+        "genero": "Feminino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "117",
+        "nome": "Duarte Fernandes",
+        "turma": "8A",
+        "ano": "8",
+        "genero": "Masculino",
+        "categoria": "Iniciados"
+    },
+ 
+    {
+        "numero": "118",
+        "nome": "Madalena Pinto",
+        "turma": "7B",
+        "ano": "7",
+        "genero": "Feminino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "119",
+        "nome": "Tomás Santos",
+        "turma": "9A",
+        "ano": "9",
+        "genero": "Masculino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "120",
+        "nome": "Laura Ferreira",
+        "turma": "8B",
+        "ano": "8",
+        "genero": "Feminino",
+        "categoria": "Iniciados"
+    },
+ 
+    {
+        "numero": "121",
+        "nome": "Afonso Silva",
+        "turma": "7A",
+        "ano": "7",
+        "genero": "Masculino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "122",
+        "nome": "Mariana Martins",
+        "turma": "9B",
+        "ano": "9",
+        "genero": "Feminino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "123",
+        "nome": "Salvador Costa",
+        "turma": "8A",
+        "ano": "8",
+        "genero": "Masculino",
+        "categoria": "Iniciados"
+    },
+ 
+    {
+        "numero": "124",
+        "nome": "Alice Oliveira",
+        "turma": "7B",
+        "ano": "7",
+        "genero": "Feminino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "125",
+        "nome": "Martim Rodrigues",
+        "turma": "9A",
+        "ano": "9",
+        "genero": "Masculino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "126",
+        "nome": "Catarina Pereira",
+        "turma": "8B",
+        "ano": "8",
+        "genero": "Feminino",
+        "categoria": "Iniciados"
+    },
+ 
+    {
+        "numero": "127",
+        "nome": "Rodrigo Almeida",
+        "turma": "7A",
+        "ano": "7",
+        "genero": "Masculino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "128",
+        "nome": "Eva Gomes",
+        "turma": "9B",
+        "ano": "9",
+        "genero": "Feminino",
+        "categoria": "Infantis"
+    },
+ 
+    {
+        "numero": "129",
+        "nome": "David Lopes",
+        "turma": "8A",
+        "ano": "8",
+        "genero": "Masculino",
+        "categoria": "Iniciados"
+    },
+ 
+    {
+        "numero": "130",
+        "nome": "Íris Carvalho",
+        "turma": "7B",
+        "ano": "7",
+        "genero": "Feminino",
+        "categoria": "Infantis"
+    }
+]
