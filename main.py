@@ -20,13 +20,36 @@ VERDE = "#16834A"
 VERDE_ESCURO = "#11663A"
 VERDE_CLARO = "#E8F5EC"
 VERMELHO = "#C93C3C"
-FUNDO = "#F3F6F4"
-TEXTO = "#24332A"
+FUNDO = "#F4F7F2"
+TEXTO = "#1F2E29"
+TEXTO_MUTO = "#5F7268"
+BORDA = "#E2EAE4"
+CARD = "#FFFFFF"
 
 
 def _responsive_width(page, preferred):
     largura = page.width or 1300
     return max(120, min(preferred, largura - 44))
+
+
+def _ano_a_partir_data(data):
+    if not data:
+        return None
+    try:
+        if isinstance(data, datetime):
+            return data.year
+        return date.fromisoformat(str(data)).year
+    except ValueError:
+        return None
+
+
+def _etiqueta_prova(prova):
+    nome = str(prova["nome"]).strip() if prova.get("nome") is not None else ""
+    data = prova.get("data")
+    if data:
+        return f"{nome} ({data})"
+    ano = prova.get("ano")
+    return f"{nome} ({ano})" if ano is not None else nome
 
 
 def pode(modulo):
@@ -202,14 +225,14 @@ def login_view(page: ft.Page, on_ok):
 
 def home_view(page: ft.Page, on_logout):
     mobile = (page.width or 1300) < 760
-    provas = query("SELECT id, nome, ano, estado FROM provas ORDER BY ano DESC, id DESC")
+    provas = query("SELECT id, nome, data, ano, estado FROM provas ORDER BY ano DESC, id DESC")
     if not S["prova_id"] and provas:
         S["prova_id"] = provas[0]["id"]
 
     prova_dd = ft.Dropdown(
         label="Prova",
         width=_responsive_width(page, 390),
-        options=[ft.dropdown.Option(str(p["id"]), f"{p['nome']} ({p['ano']})") for p in provas],
+        options=[ft.dropdown.Option(str(p["id"]), _etiqueta_prova(p)) for p in provas],
         value=str(S["prova_id"]) if S["prova_id"] else None,
     )
 
@@ -224,14 +247,14 @@ def home_view(page: ft.Page, on_logout):
 
     def atualizar_provas():
         provas_atualizadas = query(
-            "SELECT id, nome, ano, estado FROM provas ORDER BY ano DESC, id DESC"
+            "SELECT id, nome, data, ano, estado FROM provas ORDER BY ano DESC, id DESC"
         )
         ids_provas = {p["id"] for p in provas_atualizadas}
         selecao_alterada = S["prova_id"] not in ids_provas
         if selecao_alterada:
             S["prova_id"] = provas_atualizadas[0]["id"] if provas_atualizadas else None
         prova_dd.options = [
-            ft.dropdown.Option(str(p["id"]), f"{p['nome']} ({p['ano']})")
+            ft.dropdown.Option(str(p["id"]), _etiqueta_prova(p))
             for p in provas_atualizadas
         ]
         prova_dd.value = str(S["prova_id"]) if S["prova_id"] else None
@@ -265,56 +288,84 @@ def home_view(page: ft.Page, on_logout):
         return ft.Container(
             content=ft.Row(
                 [
-                    ft.Icon(icon, color=VERDE if selecionado else ft.Colors.GREY_600,
-                            size=20),
+                    ft.Container(
+                        content=ft.Icon(icon, color=VERDE if selecionado else ft.Colors.GREY_600,
+                                        size=20),
+                        width=30,
+                        height=30,
+                        alignment=ft.Alignment(0, 0),
+                        border_radius=10,
+                        bgcolor=VERDE_CLARO if selecionado else "#F4F7F5",
+                    ),
                     ft.Text(label, color=cor, weight=ft.FontWeight.W_600
-                            if selecionado else ft.FontWeight.NORMAL),
+                            if selecionado else ft.FontWeight.NORMAL,
+                            size=14),
                 ],
-                spacing=14,
+                spacing=12,
             ),
             data=secao,
             on_click=escolher_secao,
-            padding=ft.Padding(14, 12, 14, 12),
-            border_radius=12,
-            bgcolor=VERDE_CLARO if selecionado else None,
+            padding=ft.Padding(10, 12, 10, 12),
+            border_radius=14,
+            bgcolor=VERDE_CLARO if selecionado else "#F9FBF9",
+            border=ft.border.all(1, "#EAF2EC") if selecionado else None,
         )
 
     def criar_menu():
         controlos = [
             ft.Container(
                 content=ft.Row([
-                    ft.CircleAvatar(
+                    ft.Container(
                         content=ft.Text(S["user"]["nome"][:1].upper(),
                                         color=ft.Colors.WHITE,
-                                        weight=ft.FontWeight.BOLD),
+                                        weight=ft.FontWeight.BOLD,
+                                        size=18),
+                        width=42,
+                        height=42,
+                        alignment=ft.Alignment(0, 0),
                         bgcolor=VERDE,
+                        border_radius=14,
                     ),
                     ft.Column([
                         ft.Text(S["user"]["nome"], weight=ft.FontWeight.BOLD,
-                                color=TEXTO),
+                                color=TEXTO, size=14),
                         ft.Text(", ".join(S["user"]["perfis"]), size=11,
-                                color=ft.Colors.GREY_700),
+                                color=TEXTO_MUTO),
                     ], spacing=2, expand=True),
                 ], spacing=12),
-                padding=ft.Padding(8, 8, 8, 16),
+                padding=ft.Padding(10, 12, 10, 12),
+                bgcolor="#F4F9F5",
+                border=ft.border.all(1, "#E6F0E8"),
+                border_radius=16,
+                margin=ft.margin.only(bottom=10),
             ),
-            ft.Divider(),
-            ft.Text("MENU", size=11, weight=ft.FontWeight.BOLD,
-                    color=ft.Colors.GREY_600),
+            ft.Container(
+                content=ft.Text("MENU", size=11, weight=ft.FontWeight.BOLD,
+                                color=ft.Colors.GREY_600),
+                padding=ft.Padding(8, 0, 8, 8),
+            ),
         ]
-        controlos.extend(
-            item(icon, label, secao)
+        itens_menu = [
+            ft.Container(
+                content=item(icon, label, secao),
+                margin=ft.margin.only(bottom=4),
+            )
             for icon, label, secao in opcoes_habilitadas
-        )
+        ]
+        controlos.extend(itens_menu)
         if not opcoes_habilitadas:
             controlos.append(ft.Text("Não existem opções habilitadas para esta conta."))
         controlos.extend([
             ft.Container(expand=True),
             ft.Divider(),
-            ft.TextButton(
-                "Terminar sessão", icon=ft.Icons.LOGOUT,
-                on_click=lambda e: on_logout(),
-                style=ft.ButtonStyle(color=VERMELHO),
+            ft.Container(
+                content=ft.TextButton(
+                    "Terminar sessão", icon=ft.Icons.LOGOUT,
+                    on_click=lambda e: on_logout(),
+                    style=ft.ButtonStyle(color=VERMELHO),
+                ),
+                alignment=ft.Alignment(0, 0),
+                padding=ft.Padding(0, 4, 0, 0),
             ),
         ])
         return ft.Column(controlos, spacing=5, expand=True)
@@ -334,10 +385,17 @@ def home_view(page: ft.Page, on_logout):
     painel_menu = ft.Container(
         content=criar_menu(),
         width=270,
-        padding=16,
-        bgcolor=ft.Colors.WHITE,
-        border=ft.border.all(1, "#E2E9E4"),
-        border_radius=18,
+        padding=18,
+        bgcolor=CARD,
+        border=ft.border.all(1, BORDA),
+        border_radius=20,
+        clip_behavior=ft.ClipBehavior.HARD_EDGE,
+        shadow=ft.BoxShadow(
+            blur_radius=18,
+            color=ft.Colors.with_opacity(0.06, ft.Colors.BLACK),
+            offset=ft.Offset(0, 4),
+            spread_radius=0,
+        ),
     )
 
     page.clean()
@@ -345,10 +403,17 @@ def home_view(page: ft.Page, on_logout):
     painel_corpo = ft.Container(
         content=corpo,
         padding=12 if mobile else 24,
-        bgcolor=ft.Colors.WHITE,
-        border=ft.border.all(1, "#E2E9E4"),
-        border_radius=18,
+        bgcolor=CARD,
+        border=ft.border.all(1, BORDA),
+        border_radius=20,
         expand=True,
+        clip_behavior=ft.ClipBehavior.HARD_EDGE,
+        shadow=ft.BoxShadow(
+            blur_radius=18,
+            color=ft.Colors.with_opacity(0.05, ft.Colors.BLACK),
+            offset=ft.Offset(0, 4),
+            spread_radius=0,
+        ),
     )
     cabecalho = ft.Container(
         content=ft.Row([
@@ -362,16 +427,23 @@ def home_view(page: ft.Page, on_logout):
                     ft.Text(APP_TITLE, size=17, weight=ft.FontWeight.BOLD,
                             color=TEXTO),
                     ft.Text("Organização e resultados", size=11,
-                            color=ft.Colors.GREY_700),
+                            color=TEXTO_MUTO),
                 ], spacing=1),
             ], spacing=12),
             ft.Container(content=prova_dd, width=_responsive_width(page, 390)),
         ], wrap=True, alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             vertical_alignment=ft.CrossAxisAlignment.CENTER),
         padding=ft.Padding(12 if mobile else 22, 12, 12 if mobile else 22, 12),
-        bgcolor=ft.Colors.WHITE,
-        border=ft.border.all(1, "#E2E9E4"),
-        border_radius=18,
+        bgcolor=CARD,
+        border=ft.border.all(1, BORDA),
+        border_radius=20,
+        clip_behavior=ft.ClipBehavior.HARD_EDGE,
+        shadow=ft.BoxShadow(
+            blur_radius=16,
+            color=ft.Colors.with_opacity(0.04, ft.Colors.BLACK),
+            offset=ft.Offset(0, 3),
+            spread_radius=0,
+        ),
     )
     logout_mobile = ft.TextButton(
         "Terminar sessão", icon=ft.Icons.LOGOUT, on_click=lambda e: on_logout(),
@@ -385,9 +457,16 @@ def home_view(page: ft.Page, on_logout):
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
         ),
         padding=ft.Padding(12, 8, 12, 8),
-        bgcolor=ft.Colors.WHITE,
-        border=ft.border.all(1, "#E2E9E4"),
-        border_radius=18,
+        bgcolor=CARD,
+        border=ft.border.all(1, BORDA),
+        border_radius=20,
+        clip_behavior=ft.ClipBehavior.HARD_EDGE,
+        shadow=ft.BoxShadow(
+            blur_radius=12,
+            color=ft.Colors.with_opacity(0.03, ft.Colors.BLACK),
+            offset=ft.Offset(0, 2),
+            spread_radius=0,
+        ),
     )
     corpo_layout = (
         ft.Column([navegacao_mobile, painel_corpo], expand=True, spacing=10)
@@ -426,7 +505,6 @@ def _corpo_atual(page, on_logout, on_prova_apagada=None):
 def config_view(page, on_prova_apagada=None):
     lista = ft.Column()
     nome = ft.TextField(label="Nome da prova", width=_responsive_width(page, 280))
-    ano = ft.TextField(label="Ano", width=_responsive_width(page, 100), value=str(date.today().year))
     local = ft.TextField(label="Local", width=_responsive_width(page, 220))
     data_ = ft.TextField(label="Data (AAAA-MM-DD)", width=_responsive_width(page, 160))
     estado = ft.Dropdown(label="Estado", width=_responsive_width(page, 140), value="Planeada",
@@ -435,22 +513,46 @@ def config_view(page, on_prova_apagada=None):
     def carregar():
         lista.controls.clear()
         for p in query("SELECT * FROM provas ORDER BY ano DESC, id DESC"):
-            lista.controls.append(ft.ListTile(
-                title=ft.Text(f"{p['nome']} — {p['ano']}"),
-                subtitle=ft.Text(f"{p['data'] or '-'} · {p['local'] or '-'} · {p['estado']}"),
-                trailing=ft.Row([
-                    ft.IconButton(ft.Icons.EDIT, data=p["id"], on_click=editar,
-                                  tooltip="Editar prova"),
-                    ft.IconButton(ft.Icons.DELETE, data=p["id"],
-                                  on_click=confirmar_apagamento,
-                                  icon_color=VERMELHO, tooltip="Apagar prova"),
-                ], tight=True, spacing=0),
-            ))
+            nome_texto = str(p["nome"]).strip() if p.get("nome") is not None else ""
+            data_texto = str(p["data"]).strip() if p.get("data") is not None else "-"
+            local_texto = str(p["local"]).strip() if p.get("local") is not None else "-"
+            estado_texto = str(p["estado"]).strip() if p.get("estado") is not None else "-"
+            data_texto = data_texto or "-"
+            local_texto = local_texto or "-"
+            estado_texto = estado_texto or "-"
+            lista.controls.append(
+                ft.Container(
+                    content=ft.ListTile(
+                        leading=ft.Icon(ft.Icons.EVENT, color=VERDE),
+                        title=ft.Row([
+                            ft.Text(nome_texto or "Sem nome", weight=ft.FontWeight.W_500, size=14),
+                            ft.Text(
+                                f" | {data_texto} | {local_texto} | {estado_texto}",
+                                weight=ft.FontWeight.NORMAL,
+                                size=13,
+                                color=TEXTO_MUTO,
+                            ),
+                        ], spacing=8, wrap=True, alignment=ft.MainAxisAlignment.START),
+                        trailing=ft.Row([
+                            ft.IconButton(ft.Icons.EDIT, data=p["id"], on_click=editar,
+                                          tooltip="Editar prova"),
+                            ft.IconButton(ft.Icons.DELETE, data=p["id"],
+                                          on_click=confirmar_apagamento,
+                                          icon_color=VERMELHO, tooltip="Apagar prova"),
+                        ], tight=True, spacing=0),
+                    ),
+                    padding=ft.Padding(0, 0, 0, 0),
+                    border=ft.border.all(1, BORDA),
+                    border_radius=16,
+                    bgcolor="#F9FBF9",
+                    margin=ft.margin.only(bottom=8),
+                )
+            )
         page.update()
 
     def confirmar_apagamento(e):
         prova_id = e.control.data
-        prova = query("SELECT nome, ano FROM provas WHERE id=%s",
+        prova = query("SELECT nome, ano, data FROM provas WHERE id=%s",
                       (prova_id,), one=True)
         if not prova:
             carregar()
@@ -461,7 +563,6 @@ def config_view(page, on_prova_apagada=None):
             if S.get("_edit_prova") == prova_id:
                 S.pop("_edit_prova", None)
                 nome.value = local.value = data_.value = ""
-                ano.value = str(date.today().year)
                 estado.value = "Planeada"
             page.close(dialog)
             carregar()
@@ -473,7 +574,7 @@ def config_view(page, on_prova_apagada=None):
             title=ft.Text("Apagar prova?"),
             content=ft.Text(
                 f"Tem a certeza de que pretende apagar «{prova['nome']}» "
-                f"({prova['ano']})? As inscrições, chegadas, ocorrências e "
+                f"({_etiqueta_prova(prova)})? As inscrições, chegadas, ocorrências e "
                 "classificações associadas também serão apagadas. Esta ação "
                 "não pode ser desfeita."
             ),
@@ -490,7 +591,7 @@ def config_view(page, on_prova_apagada=None):
 
     def editar(e):
         p = query("SELECT * FROM provas WHERE id=%s", (e.control.data,), one=True)
-        nome.value, ano.value = p["nome"], str(p["ano"])
+        nome.value = p["nome"]
         local.value = p["local"] or ""
         data_.value = str(p["data"]) if p["data"] else ""
         estado.value = p["estado"]
@@ -498,31 +599,33 @@ def config_view(page, on_prova_apagada=None):
         page.update()
 
     def guardar(e):
-        if not nome.value.strip() or not ano.value.strip().isdigit():
+        nome_limpo = nome.value.strip()
+        local_limpo = local.value.strip()
+        if not nome_limpo:
             return
         d = data_.value.strip() or None
+        ano = _ano_a_partir_data(d) or date.today().year
         if S.get("_edit_prova"):
             execute("UPDATE provas SET nome=%s, ano=%s, data=%s, local=%s, estado=%s WHERE id=%s",
-                    (nome.value.strip(), int(ano.value), d, local.value.strip() or None,
+                    (nome_limpo, ano, d, local_limpo or None,
                      estado.value, S["_edit_prova"]))
             S.pop("_edit_prova", None)
         else:
             execute("INSERT INTO provas (nome, ano, data, local, estado) VALUES (%s,%s,%s,%s,%s)",
-                    (nome.value.strip(), int(ano.value), d, local.value.strip() or None, estado.value))
+                    (nome_limpo, ano, d, local_limpo or None, estado.value))
         nome.value = local.value = data_.value = ""
         carregar()
 
     def nova(e):
         S.pop("_edit_prova", None)
         nome.value = local.value = data_.value = ""
-        ano.value = str(date.today().year)
         estado.value = "Planeada"
         page.update()
 
     carregar()
     return ft.Column([
         ft.Text("Provas", size=20, weight=ft.FontWeight.BOLD),
-        ft.Row([nome, ano, local, data_, estado,
+        ft.Row([nome, local, data_, estado,
                 ft.ElevatedButton("Guardar", on_click=guardar),
                 ft.OutlinedButton("Limpar", on_click=nova)], wrap=True, spacing=8),
         ft.Divider(), lista,
@@ -857,7 +960,7 @@ def relatorios_view(page):
     historico = ft.Column()
     exportacao_pendente = {}
 
-    for edicao in query("""SELECT p.nome, p.ano, COUNT(ci.id) AS participantes,
+    for edicao in query("""SELECT p.nome, p.data, p.ano, COUNT(ci.id) AS participantes,
                                   GROUP_CONCAT(
                                       CASE WHEN ci.posicao_geral <= 3
                                            THEN CONCAT(ci.posicao_geral, 'º ', a.nome)
@@ -869,10 +972,10 @@ def relatorios_view(page):
                            JOIN inscricoes i ON i.id=ci.inscricao_id
                            JOIN alunos a ON a.id=i.aluno_id
                            WHERE p.ano < (SELECT ano FROM provas WHERE id=%s)
-                           GROUP BY p.id, p.nome, p.ano
+                           GROUP BY p.id, p.nome, p.data, p.ano
                            ORDER BY p.ano DESC, p.id DESC""", (pid,)):
         historico.controls.append(ft.ListTile(
-            title=ft.Text(f"{edicao['ano']} · {edicao['nome']}"),
+            title=ft.Text(f"{edicao['data'] or edicao['ano']} · {edicao['nome']}"),
             subtitle=ft.Text(
                 f"{edicao['participantes']} participantes · "
                 f"Pódio: {edicao['podio'] or 'sem classificações'}"
