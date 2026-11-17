@@ -524,7 +524,7 @@ def config_view(page, on_prova_apagada=None):
         ft.Text("Provas", size=20, weight=ft.FontWeight.BOLD),
         ft.Row([nome, ano, local, data_, estado,
                 ft.ElevatedButton("Guardar", on_click=guardar),
-                ft.OutlinedButton("Nova", on_click=nova)], wrap=True, spacing=8),
+                ft.OutlinedButton("Limpar", on_click=nova)], wrap=True, spacing=8),
         ft.Divider(), lista,
     ], scroll=ft.ScrollMode.AUTO, expand=True)
 
