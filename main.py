@@ -271,11 +271,11 @@ def home_view(page: ft.Page, on_logout):
     corpo.content = _corpo_atual(page, on_logout, atualizar_provas)
     painel_menu = ft.Container(
         content=criar_menu(),
-        width=270,
-        padding=16,
+        width=220,
+        padding=12,
         bgcolor=ft.Colors.WHITE,
         border=ft.Border.all(1, "#E2E9E4"),
-        border_radius=18,
+        border_radius=14,
     )
 
     page.clean()
@@ -299,23 +299,23 @@ def home_view(page: ft.Page, on_logout):
                 ft.Container(expand=True),
                 ft.Container(content=prova_dd, width=390),
             ], vertical_alignment=ft.CrossAxisAlignment.CENTER),
-            padding=ft.Padding.symmetric(horizontal=22, vertical=12),
+            padding=ft.Padding.symmetric(horizontal=18, vertical=10),
             bgcolor=ft.Colors.WHITE,
             border=ft.Border.all(1, "#E2E9E4"),
-            border_radius=18,
+            border_radius=14,
         ),
         ft.Row([
             painel_menu,
             ft.Container(
                 content=corpo,
-                padding=24,
+                padding=20,
                 bgcolor=ft.Colors.WHITE,
                 border=ft.Border.all(1, "#E2E9E4"),
-                border_radius=18,
+                border_radius=14,
                 expand=True,
             ),
-        ], expand=True, spacing=16, vertical_alignment=ft.CrossAxisAlignment.STRETCH),
-    ], expand=True, spacing=16))
+        ], expand=True, spacing=12, vertical_alignment=ft.CrossAxisAlignment.STRETCH),
+    ], expand=True, spacing=12))
 
 
 @_tratar_falha_de_ligacao
@@ -717,7 +717,11 @@ def inscricoes_view(page):
     pesquisa = ft.TextField(
         label="Pesquisar por nome, número ou dorsal",
         prefix_icon=ft.Icons.SEARCH,
-        width=330,
+        width=300,
+        height=44,
+        border_radius=20,
+        border_color="#9DCDB1",
+        bgcolor=ft.Colors.WHITE,
     )
     ciclo_inscricao = ft.Dropdown(
         label="Filtrar por ciclo",
@@ -748,9 +752,9 @@ def inscricoes_view(page):
     tabela_alunos = ft.DataTable(
         columns=[
             ft.DataColumn(ft.Text("Aluno", weight=ft.FontWeight.BOLD)),
-            ft.DataColumn(ft.Text("Escalão calculado M", weight=ft.FontWeight.BOLD)),
-            ft.DataColumn(ft.Text("Escalão calculado F", weight=ft.FontWeight.BOLD)),
+            ft.DataColumn(ft.Text("Escalão calculado", weight=ft.FontWeight.BOLD)),
             ft.DataColumn(ft.Text("Desporto adaptado", weight=ft.FontWeight.BOLD)),
+            ft.DataColumn(ft.Text("Inscrever", weight=ft.FontWeight.BOLD)),
         ],
         rows=[],
         heading_row_color=VERDE_CLARO,
@@ -767,11 +771,6 @@ def inscricoes_view(page):
         bgcolor=ft.Colors.WHITE,
     )
     selecoes_alunos = {}
-
-    def escolher_genero(e, outra_caixa):
-        if e.control.value:
-            outra_caixa.value = False
-            page.update()
 
     def atualizar_selecao_da(e):
         page.update()
@@ -888,12 +887,7 @@ def inscricoes_view(page):
         )
         for aluno in alunos:
             ja_inscrito = aluno["inscricao_id"] is not None
-            caixa_m = ft.Checkbox(
-                value=False,
-                disabled=ja_inscrito,
-                active_color=VERDE,
-            )
-            caixa_f = ft.Checkbox(
+            caixa_inscricao = ft.Checkbox(
                 value=False,
                 disabled=ja_inscrito,
                 active_color=VERDE,
@@ -903,13 +897,11 @@ def inscricoes_view(page):
                 disabled=ja_inscrito,
                 active_color=VERDE,
             )
-            caixa_m.on_change = lambda e, outra=caixa_f: escolher_genero(e, outra)
-            caixa_f.on_change = lambda e, outra=caixa_m: escolher_genero(e, outra)
             caixa_da.on_change = atualizar_selecao_da
+            caixa_inscricao.on_change = atualizar_selecao_da
             selecoes_alunos[aluno["id"]] = {
-                "M": caixa_m,
-                "F": caixa_f,
                 "DA": caixa_da,
+                "INSCREVER": caixa_inscricao,
             }
             estado = (
                 f"Já inscrito · dorsal #{aluno['dorsal']}"
@@ -931,23 +923,22 @@ def inscricoes_view(page):
                     ], spacing=3)),
                     ft.DataCell(ft.Column([
                         ft.Text(
-                            aluno["escalao_m"] or "Sem escalão",
+                            (
+                                aluno["escalao_m"]
+                                if aluno["genero"] == "M"
+                                else aluno["escalao_f"]
+                            ) or "Sem escalão",
                             color=VERDE_ESCURO,
                             weight=ft.FontWeight.W_500,
                         ),
-                        caixa_m,
-                    ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=2)),
-                    ft.DataCell(ft.Column([
-                        ft.Text(
-                            aluno["escalao_f"] or "Sem escalão",
-                            color=VERDE_ESCURO,
-                            weight=ft.FontWeight.W_500,
-                        ),
-                        caixa_f,
                     ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=2)),
                     ft.DataCell(ft.Column([
                         ft.Text("Assinalar", size=12, color="#637168"),
                         caixa_da,
+                    ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=2)),
+                    ft.DataCell(ft.Column([
+                        ft.Text("Selecionar", size=12, color="#637168"),
+                        caixa_inscricao,
                     ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=2)),
                 ],
             ))
@@ -960,12 +951,12 @@ def inscricoes_view(page):
             return
         selecionados = [
             (aluno_id, caixas) for aluno_id, caixas in selecoes_alunos.items()
-            if caixas["M"].value or caixas["F"].value or caixas["DA"].value
+            if caixas["INSCREVER"].value or caixas["DA"].value
         ]
         if not selecionados:
             _mostrar_mensagem(
                 page,
-                "Seleciona um escalão ou Desporto Adaptado para pelo menos um aluno.",
+                "Seleciona pelo menos um aluno para inscrição.",
                 False,
             )
             return
@@ -989,15 +980,11 @@ def inscricoes_view(page):
                 ignorados += 1
                 continue
 
-            genero_escalao = (
-                "M" if caixas["M"].value else
-                "F" if caixas["F"].value else aluno["genero"]
-            )
             idade = prova["ano"] - aluno["data_nascimento"].year
             escalao = query(
                 """SELECT id FROM escaloes
                    WHERE genero=%s AND idade_minima<=%s AND idade_maxima>=%s""",
-                (genero_escalao, idade, idade), one=True,
+                (aluno["genero"], idade, idade), one=True,
             )
             execute(
                 """INSERT INTO inscricoes
@@ -1364,6 +1351,9 @@ def inscricoes_view(page):
                 icon=ft.Icons.DOWNLOAD,
                 on_click=exportar_csv,
                 disabled=not pid,
+                style=ft.ButtonStyle(
+                    shape=ft.RoundedRectangleBorder(radius=12),
+                ),
             ),
             ft.Button(
                 "Carregar CSV — 500 alunos",
@@ -1371,27 +1361,36 @@ def inscricoes_view(page):
                 on_click=importar_csv,
                 bgcolor=VERDE,
                 color=ft.Colors.WHITE,
+                style=ft.ButtonStyle(
+                    shape=ft.RoundedRectangleBorder(radius=12),
+                ),
             ),
             ft.OutlinedButton(
                 "Descarregar modelo 500 alunos",
                 icon=ft.Icons.FILE_DOWNLOAD,
                 on_click=descarregar_modelo,
+                style=ft.ButtonStyle(
+                    shape=ft.RoundedRectangleBorder(radius=12),
+                ),
             ),
             ft.OutlinedButton(
                 "Apagar todos os inscritos",
                 icon=ft.Icons.DELETE_SWEEP,
                 on_click=confirmar_apagar_todos,
-                style=ft.ButtonStyle(color=VERMELHO),
+                style=ft.ButtonStyle(
+                    color=VERMELHO,
+                    shape=ft.RoundedRectangleBorder(radius=12),
+                ),
                 disabled=not pid,
             ),
-        ]),
+        ], wrap=True, spacing=10, vertical_alignment=ft.CrossAxisAlignment.CENTER),
         ft.Divider(),
         ft.Container(
             content=ft.Column([
                 ft.Text("Alunos para inscrição", size=18, weight=ft.FontWeight.BOLD),
                 ft.Text(
-                    "Seleciona o ciclo, o ano e a turma. Escolhe um escalão M ou F; "
-                    "Desporto Adaptado pode ser marcado em separado.",
+                    "Seleciona o ciclo, o ano e a turma. O género e o escalão vêm "
+                    "automaticamente dos dados importados do CSV.",
                     size=13,
                     color="#637168",
                 ),
@@ -1924,7 +1923,9 @@ def main(page: ft.Page):
     page.theme = ft.Theme(color_scheme_seed=VERDE)
     page.window.width = 1300
     page.window.height = 820
-    page.padding = 20
+    page.window.min_width = 1100
+    page.window.min_height = 700
+    page.padding = 16
 
     def logout():
         S["user"] = None
