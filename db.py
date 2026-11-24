@@ -2,8 +2,15 @@ import mysql.connector
 from config import DB_CONFIG
 
 
+class DatabaseConnectionError(Exception):
+    """Raised when the application cannot connect to the configured database."""
+
+
 def _conn():
-    return mysql.connector.connect(**DB_CONFIG)
+    try:
+        return mysql.connector.connect(**DB_CONFIG)
+    except mysql.connector.Error as error:
+        raise DatabaseConnectionError from error
 
 
 def query(sql, params=(), one=False):
@@ -13,6 +20,8 @@ def query(sql, params=(), one=False):
         cur.execute(sql, params)
         rows = cur.fetchall()
         return (rows[0] if rows else None) if one else rows
+    except (mysql.connector.InterfaceError, mysql.connector.OperationalError) as error:
+        raise DatabaseConnectionError from error
     finally:
         conn.close()
 
@@ -24,25 +33,23 @@ def execute(sql, params=()):
         cur.execute(sql, params)
         conn.commit()
         return cur.lastrowid
+    except (mysql.connector.InterfaceError, mysql.connector.OperationalError) as error:
+        raise DatabaseConnectionError from error
     finally:
         conn.close()
 
 
 def execute_transaction(statements):
     conn = _conn()
-    cur = None
     try:
         cur = conn.cursor()
-        lastrowids = []
         for sql, params in statements:
             cur.execute(sql, params)
-            lastrowids.append(cur.lastrowid)
         conn.commit()
-        return lastrowids
-    except Exception:
+    except mysql.connector.Error as error:
         conn.rollback()
+        if isinstance(error, (mysql.connector.InterfaceError, mysql.connector.OperationalError)):
+            raise DatabaseConnectionError from error
         raise
     finally:
-        if cur is not None:
-            cur.close()
         conn.close()
